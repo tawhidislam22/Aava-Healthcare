@@ -33,10 +33,19 @@ export const auth = betterAuth({
             required: false,
             defaultValue: null,
         },
-        trustedOrigins:[process.env.BETTER_AUTH_URL || "http://localhost:5000"],
-        advanced:{
-            disableCSRFCheck: true,
+
+        session:{
+            expiresIn: 60*60*1000*24,
+            updateAge: 60*60*1000*24,
+            cookieCache:{
+                enabled:true,
+                maxAge: 60*60*1000*24
+            }
         }
+        // trustedOrigins:[envVars.BETTER_AUTH_URL || "http://localhost:5000"],
+        // advanced:{
+        //     disableCSRFCheck: true,
+        // }
 
 
     }
