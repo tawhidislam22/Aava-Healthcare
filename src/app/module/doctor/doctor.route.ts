@@ -1,14 +1,26 @@
-import { NextFunction, Request, Response, Router } from "express";
 import { DoctorController } from "./doctor.controller";
-import z from "zod";
-import { Gender } from "../../../generated/prisma/enums";
+import { checkAuth } from "../../middleware/checkAuth";
+import { Role } from "../../../generated/prisma/enums";
+import { validateRequest } from "../../middleware/validateRequest";
+import { updateDoctorZodSchema } from "./doctor.validation";
+import { Router } from "express";
 
 const router=Router()
 
 
+router.get('/',
+    checkAuth(Role.ADMIN,Role.SUPER_ADMIN),
+    DoctorController.getAllDoctors)
+router.get('/:id',
+    checkAuth(Role.ADMIN,Role.SUPER_ADMIN),
+    DoctorController.getDoctorById)
+router.put('/:id',
+    checkAuth(Role.ADMIN,Role.SUPER_ADMIN),
+    DoctorController.updateDoctor)
+router.delete('/:id',
+    checkAuth(Role.ADMIN,Role.SUPER_ADMIN),
+    validateRequest(updateDoctorZodSchema),
+    DoctorController.deleteDoctor)
 
-router.get('/',(req:Request,res:Response,next:NextFunction)=>{
-
-},DoctorController.getAllDoctors)
 
 export const DoctorRoutes=router

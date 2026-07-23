@@ -1,7 +1,9 @@
 import {  Router } from "express";
 import { UserController } from "./user.controller";
-import { createDoctorZodSchema } from "./user.validation";
+import { createDoctorValidationSchema, createAdminValidationSchema } from "./user.validation";
 import { validateRequest } from "../../middleware/validateRequest";
+import { Role } from "../../../generated/prisma/browser";
+import { checkAuth } from "../../middleware/checkAuth";
 const router=Router()
 
 
@@ -16,8 +18,13 @@ router.post("/create-doctor",
 //     req.body = parseResult.data;
 //     next()
 // }
-validateRequest(createDoctorZodSchema)
+validateRequest(createDoctorValidationSchema)
 ,
 UserController.createDoctor)
+
+router.post("/create-admin",
+    validateRequest(createAdminValidationSchema),
+    checkAuth(Role.SUPER_ADMIN,Role.ADMIN),
+    UserController.createAdmin)
 
 export const UserRoutes=router
