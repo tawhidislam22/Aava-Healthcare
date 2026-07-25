@@ -61,6 +61,12 @@ export const checkAuth=(...authRoles:Role[])=>
                         throw new AppError(status.UNAUTHORIZED,"Unauthorized access! No access token found.")
                     }
 
+                    req.user={
+                        userId:user.id,
+                        email:user.email,
+                        role:user.role,
+                    }
+
                 }
                 const accessToken= cookieUtils.getCookie(req,"accessToken")
                 if(!accessToken){
