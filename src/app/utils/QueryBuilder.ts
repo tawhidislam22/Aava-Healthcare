@@ -1,11 +1,12 @@
-import { IQueryConfig, IQueryParams, IQueryResult, PrismaCountArgs, PrismaFindManyArgs, PrismaModelDelegate, PrismaNumberFilter, PrismaStringFilter,PrismaWhereConditions } from "../interfaces/query.interface";
+import { IQueryConfig, IQueryParams, IQueryResult, PrismaCountArgs, PrismaFindManyArgs, PrismaModelDelegate, PrismaNumberFilter, PrismaStringFilter, PrismaWhereConditions } from "../interfaces/query.interface";
 
+// T = Model Type
+export class QueryBuilder<
+T, 
+TWhereInput = Record<string, unknown>,
+TInclude = Record<string, unknown>
 
-export class QueryBuilder <
-T,
-TWhereInput =Record<string, unknown>,
-TInclude=Record<string, unknown>
->{
+> {
     private query : PrismaFindManyArgs;
     private countQuery : PrismaCountArgs;
     private page : number = 1;
@@ -15,21 +16,22 @@ TInclude=Record<string, unknown>
     private sortOrder : 'asc' | 'desc' = 'desc';
     private selectFields: Record<string, boolean> | undefined;
 
+
     constructor(
         private model : PrismaModelDelegate,
         private queryParams : IQueryParams,
         private config : IQueryConfig = {}
     ){
-        this.query={
-            where:{},
-            include:{},
-            orderBy:{},
-            skip:0,
-            take:10,
-        }
+        this.query = {
+            where : {},
+            include : {},
+            orderBy : {},
+            skip : 0,
+            take : 10,
+        };
 
-        this.countQuery={
-            where:{},
+        this.countQuery ={
+            where : {},
         }
     }
 
@@ -272,7 +274,6 @@ TInclude=Record<string, unknown>
         return this;
     }
 
-
     fields() : this {
         const fieldsParam = this.queryParams.fields;
         // /doctors?fields=id,name,user => select: { id: true, name: true, user: { select: { name: true } } }
@@ -377,8 +378,9 @@ TInclude=Record<string, unknown>
         return this.query;
     }
 
-    private deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
-        const result={ ...target };
+    private deepMerge(target : Record<string, unknown>, source : Record<string, unknown>) : Record<string, unknown> {
+
+        const result = {...target};
 
         for(const key in source){
             if(source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])){
@@ -394,7 +396,8 @@ TInclude=Record<string, unknown>
         return result;
     }
 
-    private parseFilterValue(value:unknown): unknown {
+    private parseFilterValue(value : unknown) : unknown {
+
         if(value === 'true'){
             return true;
         }
@@ -414,7 +417,9 @@ TInclude=Record<string, unknown>
     }
 
     private parseRangeFilter(value : Record<string, string | number>) : PrismaNumberFilter | PrismaStringFilter | Record<string, unknown> {
+
         const rangeQuery: Record<string, string | number | (string | number)[] > = {};
+
         Object.keys(value).forEach((operator) => {
             const operatorValue = value[operator];
 

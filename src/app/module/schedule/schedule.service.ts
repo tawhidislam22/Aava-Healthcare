@@ -6,8 +6,8 @@ import { IQueryParams } from "../../interfaces/query.interface";
 import { scheduleFilterableFields, scheduleIncludeConfig, scheduleSearchableFields } from "./schedule.constant";
 import { Prisma, Schedule } from "../../../generated/prisma/browser";
 import { QueryBuilder } from "../../utils/QueryBuilder";
-
-
+import AppError from "../../errorHelpers/AppError";
+import status from "http-status";
 
 const createSchedule= async (payload:ICreateSchedulePayload) => {
         const { startDate, endDate, startTime, endTime } = payload;
@@ -16,6 +16,18 @@ const createSchedule= async (payload:ICreateSchedulePayload) => {
 
     const currentDate = new Date(startDate);
     const lastDate = new Date(endDate);
+
+    const now = new Date();
+    // Reset time of 'now' to start of day for proper date comparison
+    now.setHours(0, 0, 0, 0);
+
+    if (currentDate < now) {
+        throw new AppError(status.BAD_REQUEST, "Start date cannot be in the past");
+    }
+
+    if (lastDate < currentDate) {
+        throw new AppError(status.BAD_REQUEST, "End date cannot be before start date");
+    }
 
     const schedules = [];
 

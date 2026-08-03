@@ -335,7 +335,7 @@ const initiatePayment = async (appointmentId: string, user : IRequestUser) => {
         }
     });
 
-    const appointmentData = await prisma.appointment.findUniqueOrThrow({
+    const appointmentData = await prisma.appointment.findFirstOrThrow({
         where: {
             id: appointmentId,
             patientId: patientData.id,

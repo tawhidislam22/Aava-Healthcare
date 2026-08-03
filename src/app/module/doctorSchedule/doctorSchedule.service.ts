@@ -4,8 +4,11 @@ import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { doctorScheduleFilterableFields, doctorScheduleIncludeConfig, doctorScheduleSearchableFields } from "./doctorSchedule.constant";
-import { ICreateDoctorSchedulePayload } from "./doctorSchedule.interface";
+import { ICreateDoctorSchedulePayload, IUpdateDoctorSchedulePayload } from "./doctorSchedule.interface";
 
+
+import AppError from "../../errorHelpers/AppError";
+import status from "http-status";
 
 const createMyDoctorSchedule= async (user:IRequestUser, payload: ICreateDoctorSchedulePayload) => {
         const doctorData = await prisma.doctor.findUnique({
@@ -13,6 +16,18 @@ const createMyDoctorSchedule= async (user:IRequestUser, payload: ICreateDoctorSc
                 userId: user.userId
             }
         })
+
+        const schedules = await prisma.schedule.findMany({
+            where: {
+                id: {
+                    in: payload.scheduleIds
+                }
+            }
+        })
+
+        if (schedules.length !== payload.scheduleIds.length) {
+            throw new AppError(status.BAD_REQUEST, "One or more provided schedules are invalid or do not exist");
+        }
 
         const doctorScheduleData = payload.scheduleIds.map((scheduleId) => {
             return {
@@ -112,7 +127,7 @@ const getDoctorScheduleById = async (doctorId: string, scheduleId: string) => {
     return doctorSchedule;
 }
 
-const updateMyDoctorSchedule = async (user: IRequestUser, payload: ICreateDoctorSchedulePayload) => {
+const updateMyDoctorSchedule = async (user: IRequestUser, payload: IUpdateDoctorSchedulePayload) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             email: user.email

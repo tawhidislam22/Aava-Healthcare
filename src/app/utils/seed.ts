@@ -16,6 +16,38 @@ export const seedSuperAdmin = async () => {
             return;
         }
 
+        const existingEmailUser = await prisma.user.findUnique({
+            where: {
+                email: envVars.SUPER_ADMIN_EMAIL
+            }
+        });
+
+        if (existingEmailUser) {
+            console.log("A user with the super admin email already exists but is not a super admin. Promoting them to super admin.");
+            await prisma.$transaction(async (tx) => {
+                await tx.user.update({
+                    where: { email: envVars.SUPER_ADMIN_EMAIL },
+                    data: { role: Role.SUPER_ADMIN, emailVerified: true }
+                });
+
+                const adminRecord = await tx.admin.findFirst({
+                    where: { email: envVars.SUPER_ADMIN_EMAIL }
+                });
+
+                if (!adminRecord) {
+                    await tx.admin.create({
+                        data: {
+                            userId: existingEmailUser.id,
+                            name: "Super Admin",
+                            email: envVars.SUPER_ADMIN_EMAIL,
+                        }
+                    });
+                }
+            });
+            console.log("Existing user promoted to Super Admin.");
+            return;
+        }
+
         const superAdminUser = await auth.api.signUpEmail({
             body:{
                 email : envVars.SUPER_ADMIN_EMAIL,
@@ -44,9 +76,6 @@ export const seedSuperAdmin = async () => {
                     email : envVars.SUPER_ADMIN_EMAIL,
                 }
             })
-
-            
-            
         });
 
         const superAdmin = await prisma.admin.findFirst({

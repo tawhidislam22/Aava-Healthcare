@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import ejs from "ejs";
+import status from "http-status";
 import nodemailer from "nodemailer";
+import path from "path";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import status from "http-status";
-import path from "path";
-import ejs from "ejs";
 
 const transporter = nodemailer.createTransport({
-    host:envVars.EMAIL_SENDER.SMTP_HOST,
-    secure:true,
-    auth:{
-        user:envVars.EMAIL_SENDER.SMTP_USER,
-        pass:envVars.EMAIL_SENDER.SMTP_PASS
+    host : envVars.EMAIL_SENDER.SMTP_HOST,
+    secure: true,
+    auth: {
+        user: envVars.EMAIL_SENDER.SMTP_USER,
+        pass: envVars.EMAIL_SENDER.SMTP_PASS
     },
-    port:Number(envVars.EMAIL_SENDER.SMTP_PORT)
+    port: Number(envVars.EMAIL_SENDER.SMTP_PORT)
 })
 
-interface SendEmailOptions{
+interface SendEmailOptions {
     to: string;
     subject: string;
     templateName: string;
@@ -27,10 +28,14 @@ interface SendEmailOptions{
     }[]
 }
 
-export const sendEmail=async({to,subject,templateName,templateData,attachments}:SendEmailOptions)=>{
-    try{
-        const templatePath= path.resolve(process.cwd(),`src/app/templates/${templateName}.ejs`)
+export const sendEmail = async ({subject, templateData, templateName, to, attachments} : SendEmailOptions) => {
+   
+    
+    try {
+        const templatePath = path.resolve(process.cwd(), `src/app/templates/${templateName}.ejs`);
+
         const html = await ejs.renderFile(templatePath, templateData);
+
         const info = await transporter.sendMail({
             from: envVars.EMAIL_SENDER.SMTP_FROM,
             to : to,
@@ -42,11 +47,10 @@ export const sendEmail=async({to,subject,templateName,templateData,attachments}:
                 contentType: attachment.contentType,
             }))
         })
+
         console.log(`Email sent to ${to} : ${info.messageId}`);
-    }catch(error){
-        console.error("Error sending email:", error);
-        throw new AppError(status.INTERNAL_SERVER_ERROR,"Failed to send email");
+    } catch (error : any) {
+        console.log("Email Sending Error", error.message);
+        throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to send email");
     }
 }
-
-    

@@ -1,12 +1,11 @@
 import { Response } from "express";
 
-
-interface IRequestData<T>{
-    httpStatusCode:number;
-    success:boolean;
-    message:string;
-    data?:T;
-    meta?:{
+interface IResponseData<T> {
+    httpStatusCode: number;
+    success: boolean;
+    message: string;
+    data?: T;
+    meta ?: {
         page: number;
         limit: number;
         total: number;
@@ -14,12 +13,14 @@ interface IRequestData<T>{
     }
 }
 
-export const sendResponse=<T>(res: Response, data: IRequestData<T>) => {
-    const { httpStatusCode, success, message, data: responseData,meta } = data;
+
+export const sendResponse = <T>(res: Response, responseData: IResponseData<T>) => {
+    const { httpStatusCode, success, message, data, meta } = responseData;
+
     res.status(httpStatusCode).json({
         success,
         message,
-        data: responseData,
+        data,
         meta
     });
 }

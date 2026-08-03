@@ -18,7 +18,7 @@ router.post("/",
     
 router.get("/",SpecialtyController.getAllSpecialties)
 router.get("/:id",SpecialtyController.getSpecialtyById)
-router.put("/:id",checkAuth(Role.ADMIN,Role.SUPER_ADMIN),SpecialtyController.updateSpecialty)
+router.put("/:id",checkAuth(Role.ADMIN,Role.SUPER_ADMIN), multerUpload.single("file"), SpecialtyController.updateSpecialty)
 router.delete("/:id",checkAuth(Role.ADMIN,Role.SUPER_ADMIN),SpecialtyController.deleteSpecialty)
 
 export const SpecialtyRoutes=router;
